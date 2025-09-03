@@ -45,21 +45,31 @@ async function fetchDespesas(pessoa) {
     }
 }
 
+// Substitua sua função antiga por esta versão completa
 function renderDespesas(despesas) {
     const listaEl = document.getElementById('despesas-lista');
     const totalEl = document.getElementById('valor-total');
     let total = 0;
 
+    // Limpa a lista antes de adicionar novos itens
+    listaEl.innerHTML = ''; 
+
     if (despesas.length === 0) {
         listaEl.innerHTML = '<p>Nenhuma despesa encontrada para você. Parabéns!</p>';
+        totalEl.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         return;
     }
 
     despesas.forEach(record => {
         const despesa = record.fields;
-        total += despesa.Valor || 0;
 
-        // Correção definitiva para o problema de data/fuso horário
+        // --- LÓGICA DO PAGAMENTO ---
+        // Só adiciona ao total se a despesa NÃO estiver marcada como paga
+        if (!despesa.Pago) {
+            total += despesa.Valor || 0;
+        }
+
+        // Formatação da data que já corrigimos
         const dataStringISO = despesa.Data; 
         const parteData = dataStringISO.split('T')[0];
         const [ano, mes, dia] = parteData.split('-');
@@ -67,6 +77,13 @@ function renderDespesas(despesas) {
 
         const itemEl = document.createElement('div');
         itemEl.classList.add('item');
+
+        // --- LÓGICA VISUAL DO PAGAMENTO ---
+        // Se a despesa estiver paga, adiciona uma classe 'pago' ao item
+        if (despesa.Pago) {
+            itemEl.classList.add('pago');
+        }
+
         itemEl.innerHTML = `
             <span>${dataFormatada}</span>
             <span>${despesa.Descricao}</span>
@@ -76,4 +93,4 @@ function renderDespesas(despesas) {
     });
 
     totalEl.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-} // <--- O erro estava provavelmente perto desta linha 87
+}
