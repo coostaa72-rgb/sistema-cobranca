@@ -84,5 +84,3 @@ function renderDespesas(despesas) {
     totalEl.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 }
-
-
