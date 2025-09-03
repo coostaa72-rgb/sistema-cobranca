@@ -4,4 +4,10 @@ h1, h2 { color: #555; }
 #despesas-lista .item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
 #despesas-lista .item span { flex-basis: 33%; }
 .item .valor { font-weight: bold; text-align: right; }
+
 .total { text-align: right; margin-top: 20px; color: #d9534f; }
+/* Estilo para itens que já foram pagos */
+.item.pago {
+    color: #999;
+    text-decoration: line-through;
+}
