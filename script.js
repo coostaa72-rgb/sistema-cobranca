@@ -10,8 +10,9 @@ window.addEventListener('load', () => {
     const nomePessoa = params.get('pessoa');
 
     if (!nomePessoa) {
-        document.getElementById('despesas-lista').innerHTML = '<h2>Erro: Nome da pessoa não especificado na URL.</h2><p>Exemplo de uso: ?pessoa=Joao</p>';
+        document.getElementById('despesas-lista').innerHTML = '<h2>Erro: Nome da pessoa não especificado na URL.</h2><p>Exemplo de uso: ?pessoa=Francisco</p>';
         document.getElementById('loading').style.display = 'none';
+        document.getElementById('nome-pessoa').textContent = 'Visitante';
         return;
     }
 
@@ -20,8 +21,6 @@ window.addEventListener('load', () => {
 });
 
 async function fetchDespesas(pessoa) {
-    // Monta a URL da API do Airtable, filtrando pela pessoa
-    // A fórmula do filtro é poderosa! Veja a documentação da API do Airtable.
     const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}?filterByFormula={Pessoa}='${pessoa}'`;
 
     try {
@@ -32,7 +31,7 @@ async function fetchDespesas(pessoa) {
         });
 
         if (!response.ok) {
-            throw new Error('Falha ao buscar dados do Airtable.');
+            throw new Error('Falha ao buscar dados do Airtable. Verifique suas credenciais.');
         }
 
         const data = await response.json();
@@ -60,16 +59,11 @@ function renderDespesas(despesas) {
         const despesa = record.fields;
         total += despesa.Valor || 0;
 
-        // --- MÁGICA DA CORREÇÃO DA DATA ---
-        // Pega a string de data (ex: "2025-09-11T00:00:00.000Z")
+        // Correção definitiva para o problema de data/fuso horário
         const dataStringISO = despesa.Data; 
-        // Pega apenas a parte da data (ex: "2025-09-11")
         const parteData = dataStringISO.split('T')[0];
-        // Separa em ano, mês e dia (ex: ["2025", "09", "11"])
         const [ano, mes, dia] = parteData.split('-');
-        // Monta a data no formato brasileiro (ex: "11/09/2025")
         const dataFormatada = `${dia}/${mes}/${ano}`;
-        // --- FIM DA MÁGICA ---
 
         const itemEl = document.createElement('div');
         itemEl.classList.add('item');
@@ -82,9 +76,3 @@ function renderDespesas(despesas) {
     });
 
     totalEl.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-        listaEl.appendChild(itemEl);
-    });
-
-    totalEl.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
