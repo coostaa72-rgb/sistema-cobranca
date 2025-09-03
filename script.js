@@ -1,6 +1,6 @@
 // --- CONFIGURAÇÃO ---
 // Substitua pelos seus dados do Airtable
-const AIRTABLE_API_KEY = 'patEx6QiiC1dPgjqM.e21a9d6ca962c3473670892a42a17f9472125c005a3f8b4774b9301ed6d750a7'; // Começa com "key..."
+const AIRTABLE_API_KEY = 'patVIr4OgnEBEZELv'; // Começa com "key..."
 const AIRTABLE_BASE_ID = 'appcn9tV1jZeAh68Y'; // Começa com "app..."
 const AIRTABLE_TABLE_NAME = 'Despesas'; // O nome da sua tabela
 
@@ -76,3 +76,4 @@ function renderDespesas(despesas) {
     });
 
     totalEl.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
