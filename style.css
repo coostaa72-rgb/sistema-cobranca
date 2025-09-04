@@ -74,3 +74,44 @@ details[open] > summary::before {
 .itens-container {
     padding-top: 15px;
 }
+
+/* Estilos para o spoiler interno de comprovantes */
+.comprovantes-spoiler {
+    margin-bottom: 20px;
+    border-left: 3px solid #007bff;
+    padding-left: 10px;
+}
+
+.comprovantes-summary {
+    font-size: 0.9em;
+    font-weight: normal;
+    background-color: transparent;
+    padding: 5px 0;
+    color: #007bff;
+}
+
+.comprovantes-summary:hover {
+    text-decoration: underline;
+}
+
+/* Container para as imagens */
+.imagens-container {
+    padding-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Espaço entre as imagens */
+}
+
+/* Estilo para cada imagem de comprovante */
+.comprovante-img {
+    max-width: 200px; /* Define um tamanho máximo para a miniatura */
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    transition: transform 0.2s ease;
+}
+
+.comprovante-img:hover {
+    transform: scale(1.05); /* Efeito de zoom ao passar o mouse */
+    border-color: #007bff;
+}
