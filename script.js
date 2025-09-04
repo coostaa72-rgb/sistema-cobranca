@@ -78,7 +78,6 @@ function renderMeses(parcelas) {
     
     listaEl.innerHTML = '';
 
-    // Agrupa as parcelas por mês/ano
     const mesesAgrupados = parcelas.reduce((acc, parcela) => {
         const mesAno = parcela.dataVencimento.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
         if (!acc[mesAno]) {
@@ -88,17 +87,28 @@ function renderMeses(parcelas) {
         return acc;
     }, {});
 
-    // Renderiza cada grupo de mês
+    const mesAtualKey = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
     for (const mesAno in mesesAgrupados) {
         const parcelasDoMes = mesesAgrupados[mesAno];
         let totalMesPendente = 0;
         
-        const mesContainer = document.createElement('div');
+        // --- MUDANÇA AQUI: de DIV para DETAILS ---
+        const mesContainer = document.createElement('details');
         mesContainer.classList.add('mes-container');
+        // Se for o mês atual, começa aberto
+        if (mesAno === mesAtualKey) {
+            mesContainer.open = true;
+        }
         
-        const mesTitulo = document.createElement('h3');
+        // --- MUDANÇA AQUI: de H3 para SUMMARY ---
+        const mesTitulo = document.createElement('summary');
         mesTitulo.textContent = mesAno.charAt(0).toUpperCase() + mesAno.slice(1);
         mesContainer.appendChild(mesTitulo);
+
+        // O container para os itens agora fica separado para o spoiler funcionar
+        const itensContainer = document.createElement('div');
+        itensContainer.classList.add('itens-container');
 
         parcelasDoMes.forEach(parcela => {
             if (!parcela.paga) {
@@ -116,14 +126,15 @@ function renderMeses(parcelas) {
                 <span class="descricao-item">${parcela.descricao}</span>
                 <span class="valor">${parcela.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
             `;
-            mesContainer.appendChild(itemEl);
+            itensContainer.appendChild(itemEl); // Adiciona ao container de itens
         });
 
-        // Adiciona um sumário para o mês
         const mesSumario = document.createElement('div');
         mesSumario.classList.add('mes-sumario');
         mesSumario.innerHTML = `Total pendente do mês: <strong>${totalMesPendente.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>`;
-        mesContainer.appendChild(mesSumario);
+        
+        itensContainer.appendChild(mesSumario); // Adiciona o sumário junto com os itens
+        mesContainer.appendChild(itensContainer); // Adiciona o container de itens ao spoiler
         
         listaEl.appendChild(mesContainer);
         totalGeralPendente += totalMesPendente;
@@ -131,3 +142,4 @@ function renderMeses(parcelas) {
 
     totalEl.textContent = totalGeralPendente.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
+
