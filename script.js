@@ -45,7 +45,7 @@ async function fetchDespesas(pessoa) {
     }
 }
 
-// Substitua sua função gerarParcelas por esta
+// Substitua sua função gerarParcelas antiga por esta versão corrigida
 function gerarParcelas(compras) {
     const parcelasGeradas = [];
 
@@ -56,20 +56,21 @@ function gerarParcelas(compras) {
 
         for (let i = 1; i <= numParcelas; i++) {
             const dataCompra = new Date(compra.Data);
-            const dataVencimento = new Date(dataCompra.setMonth(dataCompra.getMonth() + (i - 1)));
+            const dataVencimento = new Date(new Date(dataCompra).setMonth(dataCompra.getMonth() + (i - 1)));
 
-            // --- NOVA LÓGICA DE FATURA ---
+            // --- LÓGICA DE FATURA CORRIGIDA ---
             let dataDaFatura = new Date(dataVencimento);
-            // Se o dia do vencimento for até o dia 7, a fatura é do mês anterior
-            if (dataVencimento.getDate() <= 7) {
-                dataDaFatura.setMonth(dataDaFatura.getMonth() - 1);
+            // Se o dia do vencimento da parcela for APÓS o dia 7,
+            // ela pertence à fatura do MÊS SEGUINTE.
+            if (dataVencimento.getDate() > 7) {
+                dataDaFatura.setMonth(dataDaFatura.getMonth() + 1);
             }
 
             parcelasGeradas.push({
                 descricao: `${compra.Descricao} (${i}/${numParcelas})`,
                 valor: compra.ValorParcela || 0,
                 dataVencimento: dataVencimento,
-                fatura: dataDaFatura, // Adicionamos a data da fatura ao objeto
+                fatura: dataDaFatura, // Usamos a data da fatura corrigida
                 paga: i <= parcelasPagas
             });
         }
@@ -157,3 +158,4 @@ function renderMeses(parcelas) {
 
     totalEl.textContent = totalGeralPendente.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
+
