@@ -180,7 +180,22 @@ function renderMeses(parcelas) {
     });
 
     totalEl.textContent = totalGeralPendente.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    
+    // --- ADIÇÃO AQUI ---
+    // Prepara os dados e chama a função do gráfico
+    const dadosParaGrafico = faturasOrdenadas.map(faturaKey => {
+        const parcelasDaFatura = faturasAgrupadas[faturaKey].parcelas;
+        const totalFatura = parcelasDaFatura.reduce((acc, p) => acc + p.valor, 0); // Soma o valor de TODAS as parcelas da fatura
+        return {
+            nome: faturaKey.charAt(0).toUpperCase() + faturaKey.slice(1),
+            total: totalFatura
+        };
+    }).reverse(); // .reverse() para mostrar do mais antigo para o mais novo no gráfico
+
+    renderGraficoGastos(dadosParaGrafico);
+    // --- FIM DA ADIÇÃO ---
 }
+
 // Cole esta nova função no final do seu arquivo script.js
 function renderGraficoGastos(dadosFaturas) {
     const ctx = document.getElementById('graficoGastos').getContext('2d');
@@ -235,3 +250,4 @@ function renderGraficoGastos(dadosFaturas) {
         }
     });
 }
+
