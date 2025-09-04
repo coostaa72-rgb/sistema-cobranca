@@ -115,3 +115,10 @@ details[open] > summary::before {
     transform: scale(1.05); /* Efeito de zoom ao passar o mouse */
     border-color: #007bff;
 }
+
+/* Adicione este código ao final do seu style.css */
+.grafico-container {
+    margin-top: 30px;
+    height: 400px; /* Altura do gráfico */
+    padding: 20px;
+}
