@@ -118,10 +118,11 @@ details[open] > summary::before {
 
 /* Adicione este código ao final do seu style.css */
 .grafico-container {
-    margin-top: 13px;
+    margin-top: 20px;
     height: 90px; /* Altura do gráfico */
     padding: 15px;
 }
+
 
 
 
