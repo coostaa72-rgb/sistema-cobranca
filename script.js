@@ -45,7 +45,7 @@ async function fetchDespesas(pessoa) {
     }
 }
 
-// Substitua sua função gerarParcelas antiga por esta versão corrigida
+// Substitua sua função gerarParcelas por esta
 function gerarParcelas(compras) {
     const parcelasGeradas = [];
 
@@ -58,10 +58,7 @@ function gerarParcelas(compras) {
             const dataCompra = new Date(compra.Data);
             const dataVencimento = new Date(new Date(dataCompra).setMonth(dataCompra.getMonth() + (i - 1)));
 
-            // --- LÓGICA DE FATURA CORRIGIDA ---
             let dataDaFatura = new Date(dataVencimento);
-            // Se o dia do vencimento da parcela for APÓS o dia 7,
-            // ela pertence à fatura do MÊS SEGUINTE.
             if (dataVencimento.getDate() > 7) {
                 dataDaFatura.setMonth(dataDaFatura.getMonth() + 1);
             }
@@ -70,8 +67,11 @@ function gerarParcelas(compras) {
                 descricao: `${compra.Descricao} (${i}/${numParcelas})`,
                 valor: compra.ValorParcela || 0,
                 dataVencimento: dataVencimento,
-                fatura: dataDaFatura, // Usamos a data da fatura corrigida
-                paga: i <= parcelasPagas
+                fatura: dataDaFatura,
+                paga: i <= parcelasPagas,
+                // --- NOVA LÓGICA DE IMAGENS ---
+                // Passamos o array de comprovantes da compra original para cada parcela gerada
+                comprovantes: compra.Comprovantes || [] 
             });
         }
     });
@@ -80,7 +80,7 @@ function gerarParcelas(compras) {
 }
 
 
-// Substitua sua função renderMeses por esta versão final
+// Substitua sua função renderMeses por esta versão final com o spoiler de imagens
 function renderMeses(parcelas) {
     const listaEl = document.getElementById('despesas-lista');
     const totalEl = document.getElementById('valor-total');
@@ -88,18 +88,23 @@ function renderMeses(parcelas) {
     
     listaEl.innerHTML = '';
 
-    // AGORA AGRUPAMOS PELA NOVA DATA DA FATURA
     const faturasAgrupadas = parcelas.reduce((acc, parcela) => {
-        // A chave do grupo agora é o mês/ano da fatura
         const faturaKey = parcela.fatura.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
         if (!acc[faturaKey]) {
-            acc[faturaKey] = [];
+            // A estrutura agora guarda as parcelas e um mapa para os comprovantes (evita duplicatas)
+            acc[faturaKey] = { parcelas: [], comprovantes: new Map() };
         }
-        acc[faturaKey].push(parcela);
+        acc[faturaKey].parcelas.push(parcela);
+        
+        // Adiciona os comprovantes ao mapa, usando o ID da imagem como chave para evitar duplicatas
+        if (parcela.comprovantes.length > 0) {
+            parcela.comprovantes.forEach(comprovante => {
+                acc[faturaKey].comprovantes.set(comprovante.id, comprovante.url);
+            });
+        }
         return acc;
     }, {});
 
-    // Ordena as faturas da mais recente para a mais antiga
     const faturasOrdenadas = Object.keys(faturasAgrupadas).sort((a, b) => {
         const dataA = new Date(`01 ${a.replace(' de ', ' ')}`);
         const dataB = new Date(`01 ${b.replace(' de ', ' ')}`);
@@ -111,14 +116,14 @@ function renderMeses(parcelas) {
     const faturaAtualKey = mesFaturaAtual.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
     faturasOrdenadas.forEach(faturaKey => {
-        const parcelasDaFatura = faturasAgrupadas[faturaKey];
+        const dadosFatura = faturasAgrupadas[faturaKey];
+        const parcelasDaFatura = dadosFatura.parcelas;
+        const comprovantesDaFatura = Array.from(dadosFatura.comprovantes.values());
         let totalFaturaPendente = 0;
         
         const faturaContainer = document.createElement('details');
         faturaContainer.classList.add('mes-container');
-        if (faturaKey === faturaAtualKey) {
-            faturaContainer.open = true;
-        }
+        if (faturaKey === faturaAtualKey) faturaContainer.open = true;
         
         const faturaTitulo = document.createElement('summary');
         faturaTitulo.textContent = `Fatura de ${faturaKey.charAt(0).toUpperCase() + faturaKey.slice(1)}`;
@@ -126,14 +131,33 @@ function renderMeses(parcelas) {
 
         const itensContainer = document.createElement('div');
         itensContainer.classList.add('itens-container');
+        
+        // --- LÓGICA PARA RENDERIZAR O SPOILER DE IMAGENS ---
+        if (comprovantesDaFatura.length > 0) {
+            const comprovantesSpoiler = document.createElement('details');
+            comprovantesSpoiler.classList.add('comprovantes-spoiler');
+            
+            const comprovantesTitulo = document.createElement('summary');
+            comprovantesTitulo.classList.add('comprovantes-summary');
+            comprovantesTitulo.textContent = `Ver ${comprovantesDaFatura.length} comprovante(s)`;
+            comprovantesSpoiler.appendChild(comprovantesTitulo);
 
-        // Ordena as parcelas dentro da fatura por data de vencimento
+            const imagensContainer = document.createElement('div');
+            imagensContainer.classList.add('imagens-container');
+            comprovantesDaFatura.forEach(url => {
+                imagensContainer.innerHTML += `
+                    <a href="${url}" target="_blank" rel="noopener noreferrer">
+                        <img src="${url}" alt="Comprovante da fatura" class="comprovante-img">
+                    </a>
+                `;
+            });
+            comprovantesSpoiler.appendChild(imagensContainer);
+            itensContainer.appendChild(comprovantesSpoiler);
+        }
+
         parcelasDaFatura.sort((a, b) => a.dataVencimento - b.dataVencimento);
-
         parcelasDaFatura.forEach(parcela => {
-            if (!parcela.paga) {
-                totalFaturaPendente += parcela.valor;
-            }
+            if (!parcela.paga) totalFaturaPendente += parcela.valor;
             const itemEl = document.createElement('div');
             itemEl.classList.add('item');
             if (parcela.paga) itemEl.classList.add('pago');
@@ -151,11 +175,9 @@ function renderMeses(parcelas) {
         
         itensContainer.appendChild(faturaSumario);
         faturaContainer.appendChild(itensContainer);
-        
         listaEl.appendChild(faturaContainer);
         totalGeralPendente += totalFaturaPendente;
     });
 
     totalEl.textContent = totalGeralPendente.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
-
