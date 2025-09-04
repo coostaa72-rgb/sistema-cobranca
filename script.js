@@ -181,3 +181,57 @@ function renderMeses(parcelas) {
 
     totalEl.textContent = totalGeralPendente.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
+// Cole esta nova função no final do seu arquivo script.js
+function renderGraficoGastos(dadosFaturas) {
+    const ctx = document.getElementById('graficoGastos').getContext('2d');
+
+    // Prepara os dados para o gráfico
+    const labels = dadosFaturas.map(fatura => fatura.nome); // Ex: ["agosto de 2023", "julho de 2023"]
+    const data = dadosFaturas.map(fatura => fatura.total);   // Ex: [500.50, 350.00]
+
+    new Chart(ctx, {
+        type: 'bar', // Tipo do gráfico: barras
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Total Gasto na Fatura (R$)',
+                data: data,
+                backgroundColor: 'rgba(0, 123, 255, 0.7)',
+                borderColor: 'rgba(0, 123, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        // Formata o eixo Y para mostrar como moeda
+                        callback: function(value, index, values) {
+                            return 'R$ ' + value.toFixed(2).replace('.', ',');
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        // Formata a dica de ferramenta (tooltip) para mostrar como moeda
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.parsed.y);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
