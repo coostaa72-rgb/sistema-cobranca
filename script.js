@@ -45,6 +45,7 @@ async function fetchDespesas(pessoa) {
     }
 }
 
+// Substitua sua função gerarParcelas por esta
 function gerarParcelas(compras) {
     const parcelasGeradas = [];
 
@@ -55,14 +56,20 @@ function gerarParcelas(compras) {
 
         for (let i = 1; i <= numParcelas; i++) {
             const dataCompra = new Date(compra.Data);
-            // Adiciona (i-1) meses à data da compra para obter a data de vencimento da parcela
             const dataVencimento = new Date(dataCompra.setMonth(dataCompra.getMonth() + (i - 1)));
+
+            // --- NOVA LÓGICA DE FATURA ---
+            let dataDaFatura = new Date(dataVencimento);
+            // Se o dia do vencimento for até o dia 7, a fatura é do mês anterior
+            if (dataVencimento.getDate() <= 7) {
+                dataDaFatura.setMonth(dataDaFatura.getMonth() - 1);
+            }
 
             parcelasGeradas.push({
                 descricao: `${compra.Descricao} (${i}/${numParcelas})`,
                 valor: compra.ValorParcela || 0,
                 dataVencimento: dataVencimento,
-                categoria: compra.Categoria,
+                fatura: dataDaFatura, // Adicionamos a data da fatura ao objeto
                 paga: i <= parcelasPagas
             });
         }
@@ -71,6 +78,8 @@ function gerarParcelas(compras) {
     return parcelasGeradas;
 }
 
+
+// Substitua sua função renderMeses por esta versão final
 function renderMeses(parcelas) {
     const listaEl = document.getElementById('despesas-lista');
     const totalEl = document.getElementById('valor-total');
@@ -78,68 +87,73 @@ function renderMeses(parcelas) {
     
     listaEl.innerHTML = '';
 
-    const mesesAgrupados = parcelas.reduce((acc, parcela) => {
-        const mesAno = parcela.dataVencimento.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-        if (!acc[mesAno]) {
-            acc[mesAno] = [];
+    // AGORA AGRUPAMOS PELA NOVA DATA DA FATURA
+    const faturasAgrupadas = parcelas.reduce((acc, parcela) => {
+        // A chave do grupo agora é o mês/ano da fatura
+        const faturaKey = parcela.fatura.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+        if (!acc[faturaKey]) {
+            acc[faturaKey] = [];
         }
-        acc[mesAno].push(parcela);
+        acc[faturaKey].push(parcela);
         return acc;
     }, {});
 
-    const mesAtualKey = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    // Ordena as faturas da mais recente para a mais antiga
+    const faturasOrdenadas = Object.keys(faturasAgrupadas).sort((a, b) => {
+        const dataA = new Date(`01 ${a.replace(' de ', ' ')}`);
+        const dataB = new Date(`01 ${b.replace(' de ', ' ')}`);
+        return dataB - dataA;
+    });
 
-    for (const mesAno in mesesAgrupados) {
-        const parcelasDoMes = mesesAgrupados[mesAno];
-        let totalMesPendente = 0;
+    const mesFaturaAtual = new Date();
+    if(new Date().getDate() <= 7) mesFaturaAtual.setMonth(mesFaturaAtual.getMonth() - 1);
+    const faturaAtualKey = mesFaturaAtual.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+    faturasOrdenadas.forEach(faturaKey => {
+        const parcelasDaFatura = faturasAgrupadas[faturaKey];
+        let totalFaturaPendente = 0;
         
-        // --- MUDANÇA AQUI: de DIV para DETAILS ---
-        const mesContainer = document.createElement('details');
-        mesContainer.classList.add('mes-container');
-        // Se for o mês atual, começa aberto
-        if (mesAno === mesAtualKey) {
-            mesContainer.open = true;
+        const faturaContainer = document.createElement('details');
+        faturaContainer.classList.add('mes-container');
+        if (faturaKey === faturaAtualKey) {
+            faturaContainer.open = true;
         }
         
-        // --- MUDANÇA AQUI: de H3 para SUMMARY ---
-        const mesTitulo = document.createElement('summary');
-        mesTitulo.textContent = mesAno.charAt(0).toUpperCase() + mesAno.slice(1);
-        mesContainer.appendChild(mesTitulo);
+        const faturaTitulo = document.createElement('summary');
+        faturaTitulo.textContent = `Fatura de ${faturaKey.charAt(0).toUpperCase() + faturaKey.slice(1)}`;
+        faturaContainer.appendChild(faturaTitulo);
 
-        // O container para os itens agora fica separado para o spoiler funcionar
         const itensContainer = document.createElement('div');
         itensContainer.classList.add('itens-container');
 
-        parcelasDoMes.forEach(parcela => {
-            if (!parcela.paga) {
-                totalMesPendente += parcela.valor;
-            }
+        // Ordena as parcelas dentro da fatura por data de vencimento
+        parcelasDaFatura.sort((a, b) => a.dataVencimento - b.dataVencimento);
 
+        parcelasDaFatura.forEach(parcela => {
+            if (!parcela.paga) {
+                totalFaturaPendente += parcela.valor;
+            }
             const itemEl = document.createElement('div');
             itemEl.classList.add('item');
-            if (parcela.paga) {
-                itemEl.classList.add('pago');
-            }
-
+            if (parcela.paga) itemEl.classList.add('pago');
             itemEl.innerHTML = `
                 <span>${parcela.dataVencimento.toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
                 <span class="descricao-item">${parcela.descricao}</span>
                 <span class="valor">${parcela.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
             `;
-            itensContainer.appendChild(itemEl); // Adiciona ao container de itens
+            itensContainer.appendChild(itemEl);
         });
 
-        const mesSumario = document.createElement('div');
-        mesSumario.classList.add('mes-sumario');
-        mesSumario.innerHTML = `Total pendente do mês: <strong>${totalMesPendente.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>`;
+        const faturaSumario = document.createElement('div');
+        faturaSumario.classList.add('mes-sumario');
+        faturaSumario.innerHTML = `Total pendente da fatura: <strong>${totalFaturaPendente.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>`;
         
-        itensContainer.appendChild(mesSumario); // Adiciona o sumário junto com os itens
-        mesContainer.appendChild(itensContainer); // Adiciona o container de itens ao spoiler
+        itensContainer.appendChild(faturaSumario);
+        faturaContainer.appendChild(itensContainer);
         
-        listaEl.appendChild(mesContainer);
-        totalGeralPendente += totalMesPendente;
-    }
+        listaEl.appendChild(faturaContainer);
+        totalGeralPendente += totalFaturaPendente;
+    });
 
     totalEl.textContent = totalGeralPendente.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
-
