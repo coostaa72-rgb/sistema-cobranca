@@ -44,3 +44,33 @@ h1, h2 { color: #555; }
     font-size: 0.9em;
     color: #555;
 }
+/* Estilo para o título do spoiler (o mês) */
+summary {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.2em;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    list-style: none; /* Remove a setinha padrão do spoiler */
+}
+
+summary::-webkit-details-marker {
+    display: none; /* Remove a setinha no Chrome/Safari */
+}
+/* Adiciona nossa própria setinha */
+summary::before {
+    content: '▶';
+    margin-right: 10px;
+    font-size: 0.8em;
+    display: inline-block;
+    transition: transform 0.2s;
+}
+
+details[open] > summary::before {
+    transform: rotate(90deg);
+}
+
+.itens-container {
+    padding-top: 15px;
+}
