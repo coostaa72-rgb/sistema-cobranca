@@ -58,6 +58,7 @@ function renderDespesas(despesas) {
         'Contas': '💡',
         'Lazer': '🎬',
         'Outros': '🛒'
+        'Farmácia': '💊'
     };
 
     listaEl.innerHTML = ''; 
@@ -105,4 +106,5 @@ function renderDespesas(despesas) {
 
     totalEl.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
+
 
