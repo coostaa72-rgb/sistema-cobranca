@@ -131,30 +131,3 @@ function renderMeses(parcelas) {
 
     totalEl.textContent = totalGeralPendente.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
-Fase 3: Novos Estilos no CSS (style.css)
-A nova exibição por meses precisa de um pouco de estilo para ficar organizada.
-Ação: Adicione ao seu CSS
-Abra seu arquivo style.css e adicione este código no final.
-code
-Css
-/* Estilos para a nova visualização por meses */
-.mes-container {
-    margin-bottom: 30px;
-    padding: 15px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-}
-
-.mes-container h3 {
-    margin-top: 0;
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 10px;
-    color: #333;
-}
-
-.mes-sumario {
-    text-align: right;
-    margin-top: 15px;
-    font-size: 0.9em;
-    color: #555;
-}
