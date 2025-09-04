@@ -1,13 +1,12 @@
-body { font-family: sans-serif; background-color: #f4f4f4; color: #333; }
-.container { max-width: 800px; margin: 20px auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-h1, h2 { color: #555; }
-#despesas-lista .item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
-#despesas-lista .item span { flex-basis: 33%; }
-.item .valor { font-weight: bold; text-align: right; }
+/* Ajustes para a descrição com ícone */
+.descricao-item {
+    text-align: left; /* Alinha o texto à esquerda */
+    flex: 1; /* Faz a descrição ocupar o espaço que sobrar */
+}
 
-.total { text-align: right; margin-top: 20px; color: #d9534f; }
-/* Estilo para itens que já foram pagos */
-.item.pago {
-    color: #999;
-    text-decoration: line-through;
+.categoria-icon {
+    margin-right: 8px; /* Espaço entre o ícone e o texto */
+    display: inline-block;
+    width: 25px; /* Garante alinhamento se os ícones tiverem larguras diferentes */
+    text-align: center;
 }
