@@ -55,10 +55,9 @@ function renderDespesas(despesas) {
     const categoriaIcones = {
         'Alimentação': '🍔',
         'Transporte': '🚗',
-        'Contas': '💡',
+        'Farmacia': '💊',
         'Lazer': '🎬',
-        'Outros': '🛒'
-        'Farmacia': '💊'
+        'Outros': '🛒',
     };
 
     listaEl.innerHTML = ''; 
@@ -106,6 +105,7 @@ function renderDespesas(despesas) {
 
     totalEl.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
+
 
 
 
