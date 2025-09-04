@@ -51,7 +51,15 @@ function renderDespesas(despesas) {
     const totalEl = document.getElementById('valor-total');
     let total = 0;
 
-    // Limpa a lista antes de adicionar novos itens
+    // Mapeamento de categorias para ícones (emojis)
+    const categoriaIcones = {
+        'Alimentação': '🍔',
+        'Transporte': '🚗',
+        'Contas': '💡',
+        'Lazer': '🎬',
+        'Outros': '🛒'
+    };
+
     listaEl.innerHTML = ''; 
 
     if (despesas.length === 0) {
@@ -63,30 +71,33 @@ function renderDespesas(despesas) {
     despesas.forEach(record => {
         const despesa = record.fields;
 
-        // --- LÓGICA DO PAGAMENTO ---
-        // Só adiciona ao total se a despesa NÃO estiver marcada como paga
         if (!despesa.Pago) {
             total += despesa.Valor || 0;
         }
 
-        // Formatação da data que já corrigimos
         const dataStringISO = despesa.Data; 
         const parteData = dataStringISO.split('T')[0];
         const [ano, mes, dia] = parteData.split('-');
         const dataFormatada = `${dia}/${mes}/${ano}`;
 
+        // --- LÓGICA DAS CATEGORIAS ---
+        // Pega o ícone correspondente à categoria. Se não encontrar, usa o ícone de 'Outros'.
+        const icone = categoriaIcones[despesa.Categoria] || categoriaIcones['Outros'];
+
         const itemEl = document.createElement('div');
         itemEl.classList.add('item');
 
-        // --- LÓGICA VISUAL DO PAGAMENTO ---
-        // Se a despesa estiver paga, adiciona uma classe 'pago' ao item
         if (despesa.Pago) {
             itemEl.classList.add('pago');
         }
 
+        // Adicionamos o ícone antes da descrição
         itemEl.innerHTML = `
             <span>${dataFormatada}</span>
-            <span>${despesa.Descricao}</span>
+            <span class="descricao-item">
+                <span class="categoria-icon">${icone}</span>
+                ${despesa.Descricao}
+            </span>
             <span class="valor">${despesa.Valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
         `;
         listaEl.appendChild(itemEl);
@@ -94,3 +105,4 @@ function renderDespesas(despesas) {
 
     totalEl.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
+
