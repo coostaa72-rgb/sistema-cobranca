@@ -21,21 +21,21 @@ window.addEventListener('load', () => {
 });
 
 async function fetchDespesas(pessoa) {
-    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}?filterByFormula={Pessoa}='${pessoa}'`;
+    // Ordena os registros pela data da compra para garantir a ordem cronológica
+    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}?filterByFormula={Pessoa}='${pessoa}'&sort%5B0%5D%5Bfield%5D=Data&sort%5B0%5D%5Bdirection%5D=asc`;
 
     try {
         const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${AIRTABLE_API_KEY}`
-            }
+            headers: { 'Authorization': `Bearer ${AIRTABLE_API_KEY}` }
         });
 
         if (!response.ok) {
-            throw new Error('Falha ao buscar dados do Airtable. Verifique suas credenciais.');
+            throw new Error('Falha ao buscar dados do Airtable.');
         }
 
         const data = await response.json();
-        renderDespesas(data.records);
+        const todasAsParcelas = gerarParcelas(data.records);
+        renderMeses(todasAsParcelas);
 
     } catch (error) {
         console.error(error);
@@ -45,68 +45,116 @@ async function fetchDespesas(pessoa) {
     }
 }
 
-// Substitua sua função antiga por esta versão completa
-function renderDespesas(despesas) {
-    const listaEl = document.getElementById('despesas-lista');
-    const totalEl = document.getElementById('valor-total');
-    let total = 0;
+function gerarParcelas(compras) {
+    const parcelasGeradas = [];
 
-    // Mapeamento de categorias para ícones (emojis)
-    const categoriaIcones = {
-        'Alimentação': '🍔',
-        'Transporte': '🚗',
-        'Contas': '💡',
-        'Lazer': '🎬',
-        'Farmacia': '🛒'
-    };
+    compras.forEach(record => {
+        const compra = record.fields;
+        const numParcelas = compra.NumParcelas || 1;
+        const parcelasPagas = compra.ParcelasPagas || 0;
 
-    listaEl.innerHTML = ''; 
+        for (let i = 1; i <= numParcelas; i++) {
+            const dataCompra = new Date(compra.Data);
+            // Adiciona (i-1) meses à data da compra para obter a data de vencimento da parcela
+            const dataVencimento = new Date(dataCompra.setMonth(dataCompra.getMonth() + (i - 1)));
 
-    if (despesas.length === 0) {
-        listaEl.innerHTML = '<p>Nenhuma despesa encontrada para você. Parabéns!</p>';
-        totalEl.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        return;
-    }
-
-    despesas.forEach(record => {
-        const despesa = record.fields;
-
-        if (!despesa.Pago) {
-            total += despesa.Valor || 0;
+            parcelasGeradas.push({
+                descricao: `${compra.Descricao} (${i}/${numParcelas})`,
+                valor: compra.ValorParcela || 0,
+                dataVencimento: dataVencimento,
+                categoria: compra.Categoria,
+                paga: i <= parcelasPagas
+            });
         }
-
-        const dataStringISO = despesa.Data; 
-        const parteData = dataStringISO.split('T')[0];
-        const [ano, mes, dia] = parteData.split('-');
-        const dataFormatada = `${dia}/${mes}/${ano}`;
-
-        // --- LÓGICA DAS CATEGORIAS ---
-        // Pega o ícone correspondente à categoria. Se não encontrar, usa o ícone de 'Outros'.
-        const icone = categoriaIcones[despesa.Categoria] || categoriaIcones['Outros'];
-
-        const itemEl = document.createElement('div');
-        itemEl.classList.add('item');
-
-        if (despesa.Pago) {
-            itemEl.classList.add('pago');
-        }
-
-        // Adicionamos o ícone antes da descrição
-        itemEl.innerHTML = `
-            <span>${dataFormatada}</span>
-            <span class="descricao-item">
-                <span class="categoria-icon">${icone}</span>
-                ${despesa.Descricao}
-            </span>
-            <span class="valor">${despesa.Valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-        `;
-        listaEl.appendChild(itemEl);
     });
 
-    totalEl.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    return parcelasGeradas;
 }
 
+function renderMeses(parcelas) {
+    const listaEl = document.getElementById('despesas-lista');
+    const totalEl = document.getElementById('valor-total');
+    let totalGeralPendente = 0;
+    
+    listaEl.innerHTML = '';
 
+    // Agrupa as parcelas por mês/ano
+    const mesesAgrupados = parcelas.reduce((acc, parcela) => {
+        const mesAno = parcela.dataVencimento.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+        if (!acc[mesAno]) {
+            acc[mesAno] = [];
+        }
+        acc[mesAno].push(parcela);
+        return acc;
+    }, {});
 
+    // Renderiza cada grupo de mês
+    for (const mesAno in mesesAgrupados) {
+        const parcelasDoMes = mesesAgrupados[mesAno];
+        let totalMesPendente = 0;
+        
+        const mesContainer = document.createElement('div');
+        mesContainer.classList.add('mes-container');
+        
+        const mesTitulo = document.createElement('h3');
+        mesTitulo.textContent = mesAno.charAt(0).toUpperCase() + mesAno.slice(1);
+        mesContainer.appendChild(mesTitulo);
 
+        parcelasDoMes.forEach(parcela => {
+            if (!parcela.paga) {
+                totalMesPendente += parcela.valor;
+            }
 
+            const itemEl = document.createElement('div');
+            itemEl.classList.add('item');
+            if (parcela.paga) {
+                itemEl.classList.add('pago');
+            }
+
+            itemEl.innerHTML = `
+                <span>${parcela.dataVencimento.toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
+                <span class="descricao-item">${parcela.descricao}</span>
+                <span class="valor">${parcela.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+            `;
+            mesContainer.appendChild(itemEl);
+        });
+
+        // Adiciona um sumário para o mês
+        const mesSumario = document.createElement('div');
+        mesSumario.classList.add('mes-sumario');
+        mesSumario.innerHTML = `Total pendente do mês: <strong>${totalMesPendente.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong>`;
+        mesContainer.appendChild(mesSumario);
+        
+        listaEl.appendChild(mesContainer);
+        totalGeralPendente += totalMesPendente;
+    }
+
+    totalEl.textContent = totalGeralPendente.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+Fase 3: Novos Estilos no CSS (style.css)
+A nova exibição por meses precisa de um pouco de estilo para ficar organizada.
+Ação: Adicione ao seu CSS
+Abra seu arquivo style.css e adicione este código no final.
+code
+Css
+/* Estilos para a nova visualização por meses */
+.mes-container {
+    margin-bottom: 30px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.mes-container h3 {
+    margin-top: 0;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+    color: #333;
+}
+
+.mes-sumario {
+    text-align: right;
+    margin-top: 15px;
+    font-size: 0.9em;
+    color: #555;
+}
