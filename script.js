@@ -251,3 +251,55 @@ function renderGraficoGastos(dadosFaturas) {
     });
 }
 
+// ... suas constantes de configuração ...
+
+// --- LÓGICA DO FORMULÁRIO DE ADMIN ---
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('form-nova-despesa');
+    const feedbackEl = document.getElementById('form-feedback');
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedbackEl.textContent = 'Enviando...';
+
+        const valorTotal = parseFloat(document.getElementById('valorTotal').value);
+        const numParcelas = parseInt(document.getElementById('numParcelas').value, 10);
+
+        const despesa = {
+            pessoa: document.getElementById('pessoa').value,
+            descricao: document.getElementById('descricao').value,
+            data: document.getElementById('data').value,
+            categoria: document.getElementById('categoria').value,
+            valorTotal: valorTotal,
+            numParcelas: numParcelas,
+            valorParcela: valorTotal / numParcelas,
+        };
+
+        try {
+            const response = await fetch('/api/adicionar-despesa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(despesa)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Erro desconhecido');
+            }
+
+            feedbackEl.textContent = 'Despesa adicionada com sucesso! Recarregando...';
+            feedbackEl.style.color = 'green';
+            form.reset();
+            
+            // Recarrega a página para mostrar a nova despesa
+            setTimeout(() => window.location.reload(), 1500);
+
+        } catch (error) {
+            feedbackEl.textContent = `Erro: ${error.message}`;
+            feedbackEl.style.color = 'red';
+        }
+    });
+});
+
+// ... o resto do seu código (window.addEventListener('load'), etc) continua aqui ...
