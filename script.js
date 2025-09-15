@@ -5,9 +5,18 @@ const AIRTABLE_BASE_ID = 'appcn9tV1jZeAh68Y'; // E seu Base ID aqui
 const AIRTABLE_TABLE_NAME = 'Despesas'; // O nome da sua tabela
 
 // --- LÓGICA DO APLICATIVO ---
+// Modifique a função window.addEventListener('load', ...) para ficar assim:
+
 window.addEventListener('load', () => {
     const params = new URLSearchParams(window.location.search);
     const nomePessoa = params.get('pessoa');
+    
+    // --- NOVA LÓGICA DE ADMIN ---
+    // Verifica se o parâmetro 'admin' com o valor 'true' está na URL
+    if (params.get('adm') === 'true') {
+        // Se for admin, mostra o formulário
+        document.querySelector('.admin-container').style.display = 'block';
+    }
 
     if (!nomePessoa) {
         document.getElementById('despesas-lista').innerHTML = '<h2>Erro: Nome da pessoa não especificado na URL.</h2><p>Exemplo de uso: ?pessoa=Francisco</p>';
@@ -301,5 +310,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
 
 // ... o resto do seu código (window.addEventListener('load'), etc) continua aqui ...
