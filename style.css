@@ -161,4 +161,9 @@ details[open] > summary::before {
 #form-feedback {
     margin-top: 10px;
     font-weight: bold;
+
+}
+/* Esconde o formulário de admin por padrão */
+.admin-container {
+    display: none;
 }
