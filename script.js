@@ -13,7 +13,7 @@ window.addEventListener('load', () => {
     
     // --- NOVA LÓGICA DE ADMIN ---
     // Verifica se o parâmetro 'admin' com o valor 'true' está na URL
-    if (params.get('adm') === 'true') {
+    if (params.get('adm') === 'y') {
         // Se for admin, mostra o formulário
         document.querySelector('.admin-container').style.display = 'block';
     }
@@ -313,3 +313,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // ... o resto do seu código (window.addEventListener('load'), etc) continua aqui ...
+
