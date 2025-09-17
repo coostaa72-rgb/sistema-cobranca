@@ -114,28 +114,77 @@ function renderResumoPorPessoa(resumoPessoas) {
     });
 }
 
-function renderGraficoAdmin(resumoFaturas) {
-    const ctx = document.getElementById('grafico-admin').getContext('2d');
-    
-    const sortedFaturas = Object.entries(resumoFaturas).sort((a,b) => new Date(a[0]) - new Date(b[0]));
-    
-    const labels = sortedFaturas.map(f => f[0]);
-    const data = sortedFaturas.map(f => f[1]);
+// Substitua sua função antiga por esta versão completa e aprimorada
+function renderGraficoGastos(dadosFaturas) {
+    const ctx = document.getElementById('graficoGastos').getContext('2d');
 
-    new Chart(ctx, {
+    // Destrói o gráfico anterior se ele existir, para evitar bugs visuais
+    if (window.myChart instanceof Chart) {
+        window.myChart.destroy();
+    }
+
+    // --- NOVA LÓGICA DE FORMATAÇÃO DE RÓTULOS ---
+    const labels = dadosFaturas.map(fatura => {
+        // Pega um nome como "setembro de 2026"
+        const partes = fatura.nome.split(' de '); // Divide em ["setembro", "2026"]
+        const mesAbrev = partes[0].substring(0, 3); // Pega os 3 primeiros caracteres: "set"
+        const anoAbrev = partes[1].substring(2, 4); // Pega os 2 últimos caracteres do ano: "26"
+        // Retorna o formato final: "Set/26"
+        return `${mesAbrev.charAt(0).toUpperCase() + mesAbrev.slice(1)}/${anoAbrev}`;
+    });
+    
+    const data = dadosFaturas.map(fatura => fatura.total);
+
+    window.myChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Total Pendente na Fatura (R$)',
+                label: 'Total Gasto na Fatura (R$)',
                 data: data,
-                backgroundColor: 'rgba(220, 53, 69, 0.7)',
-                borderColor: 'rgba(220, 53, 69, 1)',
+                backgroundColor: 'rgba(0, 123, 255, 0.7)',
+                borderColor: 'rgba(0, 123, 255, 1)',
                 borderWidth: 1
             }]
         },
-        options: { // Reutilizando as opções do outro gráfico
-            responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'R$ ' + value.toFixed(2).replace('.', ',');
+                        }
+                    }
+                },
+                x: {
+                    // --- NOVA OPÇÃO PARA AJUSTAR A FONTE ---
+                    ticks: {
+                        font: {
+                            size: 10 // Tamanho da fonte para os meses. Ajuste se necessário.
+                        }
+                    }
+                }
+            },
+            plugins: {
+                // ... sua configuração de plugins (tooltip) continua igual ...
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.parsed.y);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
         }
     });
 }
