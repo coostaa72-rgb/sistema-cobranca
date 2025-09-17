@@ -114,15 +114,6 @@ function renderResumoPorPessoa(resumoPessoas) {
     });
 }
 
-// Substitua sua função antiga por esta versão completa e aprimorada
-function renderGraficoGastos(dadosFaturas) {
-    const ctx = document.getElementById('graficoGastos').getContext('2d');
-
-    // Destrói o gráfico anterior se ele existir, para evitar bugs visuais
-    if (window.myChart instanceof Chart) {
-        window.myChart.destroy();
-    }
-
 function renderGraficoAdmin(resumoFaturas) {
     const ctx = document.getElementById('grafico-admin').getContext('2d');
     
