@@ -115,10 +115,10 @@ details[open] > summary::before {
 
 .grafico-container {
     position: relative; /* Essencial para a Chart.js se dimensionar corretamente */
-    min-height: 500px; /* Altura mínima para o gráfico */
+    min-height: 50px; /* Altura mínima para o gráfico */
     max-height: 200px; /* Altura máxima para o gráfico */
-    padding: 20px;
-    margin-top: 30px;
+    padding: 15px;
+    margin-top: 20px;
 }
 
 /* Estilos para o formulário de Admin */
