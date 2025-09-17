@@ -171,10 +171,10 @@ function renderMeses(parcelas) {
             itemEl.classList.add('item');
             if (parcela.paga) itemEl.classList.add('pago');
             itemEl.innerHTML = `
-                <span>${parcela.dataVencimento.toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
-                <span class="descricao-item">${parcela.descricao}</span>
-                <span class="valor">${parcela.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-            `;
+            <span>${parcela.dataVencimento.toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
+            <span class="descricao-item">${parcela.descricao}</span>
+            <span class="valor">${parcela.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+        `;
             itensContainer.appendChild(itemEl);
         });
 
@@ -278,7 +278,6 @@ document.addEventListener('DOMContentLoaded', () => {
             pessoa: document.getElementById('pessoa').value,
             descricao: document.getElementById('descricao').value,
             data: document.getElementById('data').value,
-            categoria: document.getElementById('categoria').value,
             valorTotal: valorTotal,
             numParcelas: numParcelas,
             valorParcela: valorTotal / numParcelas,

@@ -20,13 +20,6 @@ h1, h2 { color: #555; }
     text-align: left; /* Alinha o texto à esquerda */
     flex: 1; /* Faz a descrição ocupar o espaço que sobrar */
 }
-
-.categoria-icon {
-    margin-right: 8px; /* Espaço entre o ícone e o texto */
-    display: inline-block;
-    width: 25px; /* Garante alinhamento se os ícones tiverem larguras diferentes */
-    text-align: center;
-}
 /* Estilos para a nova visualização por meses */
 .mes-container {
     margin-bottom: 30px;

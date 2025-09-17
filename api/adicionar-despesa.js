@@ -13,7 +13,6 @@ export default async function handler(req, res) {
         numParcelas,
         valorParcela,
         data,
-        categoria
     } = req.body;
 
     const AIRTABLE_API_KEY = process.env.AIRTABLE_API_KEY;
@@ -35,7 +34,6 @@ export default async function handler(req, res) {
                     NumParcelas: parseInt(numParcelas, 10),
                     ValorParcela: parseFloat(valorParcela),
                     Data: data,
-                    Categoria: categoria,
                     ParcelasPagas: 0 // Começa com 0 parcelas pagas
                 }
             })
