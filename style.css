@@ -117,7 +117,7 @@ details[open] > summary::before {
 .grafico-container {
     margin-top: 35px;
     height: 200px; /* Altura do gráfico */
-    padding: 20px;
+    padding: 25px;
 }
 
 /* Estilos para o formulário de Admin */
