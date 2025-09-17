@@ -209,12 +209,15 @@ function renderMeses(parcelas) {
 function renderGraficoGastos(dadosFaturas) {
     const ctx = document.getElementById('graficoGastos').getContext('2d');
 
+        if (window.myChart instanceof Chart) {
+        window.myChart.destroy();
+    }
     // Prepara os dados para o gráfico
     const labels = dadosFaturas.map(fatura => fatura.nome); // Ex: ["agosto de 2023", "julho de 2023"]
     const data = dadosFaturas.map(fatura => fatura.total);   // Ex: [500.50, 350.00]
 
-    new Chart(ctx, {
-        type: 'bar', // Tipo do gráfico: barras
+    window.myChart = new Chart(ctx, {
+        type: 'bar',
         data: {
             labels: labels,
             datasets: [{
@@ -227,13 +230,12 @@ function renderGraficoGastos(dadosFaturas) {
         },
         options: {
             responsive: false,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        // Formata o eixo Y para mostrar como moeda
-                        callback: function(value, index, values) {
+                        callback: function(value) {
                             return 'R$ ' + value.toFixed(2).replace('.', ',');
                         }
                     }
@@ -242,7 +244,6 @@ function renderGraficoGastos(dadosFaturas) {
             plugins: {
                 tooltip: {
                     callbacks: {
-                        // Formata a dica de ferramenta (tooltip) para mostrar como moeda
                         label: function(context) {
                             let label = context.dataset.label || '';
                             if (label) {
