@@ -205,16 +205,26 @@ function renderMeses(parcelas) {
     // --- FIM DA ADIÇÃO ---
 }
 
-// Cole esta nova função no final do seu arquivo script.js
+// Substitua sua função antiga por esta versão completa e aprimorada
 function renderGraficoGastos(dadosFaturas) {
     const ctx = document.getElementById('graficoGastos').getContext('2d');
 
-        if (window.myChart instanceof Chart) {
+    // Destrói o gráfico anterior se ele existir, para evitar bugs visuais
+    if (window.myChart instanceof Chart) {
         window.myChart.destroy();
     }
-    // Prepara os dados para o gráfico
-    const labels = dadosFaturas.map(fatura => fatura.nome); // Ex: ["agosto de 2023", "julho de 2023"]
-    const data = dadosFaturas.map(fatura => fatura.total);   // Ex: [500.50, 350.00]
+
+    // --- NOVA LÓGICA DE FORMATAÇÃO DE RÓTULOS ---
+    const labels = dadosFaturas.map(fatura => {
+        // Pega um nome como "setembro de 2026"
+        const partes = fatura.nome.split(' de '); // Divide em ["setembro", "2026"]
+        const mesAbrev = partes[0].substring(0, 3); // Pega os 3 primeiros caracteres: "set"
+        const anoAbrev = partes[1].substring(2, 4); // Pega os 2 últimos caracteres do ano: "26"
+        // Retorna o formato final: "Set/26"
+        return `${mesAbrev.charAt(0).toUpperCase() + mesAbrev.slice(1)}/${anoAbrev}`;
+    });
+    
+    const data = dadosFaturas.map(fatura => fatura.total);
 
     window.myChart = new Chart(ctx, {
         type: 'bar',
@@ -239,9 +249,18 @@ function renderGraficoGastos(dadosFaturas) {
                             return 'R$ ' + value.toFixed(2).replace('.', ',');
                         }
                     }
+                },
+                x: {
+                    // --- NOVA OPÇÃO PARA AJUSTAR A FONTE ---
+                    ticks: {
+                        font: {
+                            size: 10 // Tamanho da fonte para os meses. Ajuste se necessário.
+                        }
+                    }
                 }
             },
             plugins: {
+                // ... sua configuração de plugins (tooltip) continua igual ...
                 tooltip: {
                     callbacks: {
                         label: function(context) {
