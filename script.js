@@ -68,7 +68,10 @@ function gerarParcelas(compras) {
             const dataVencimento = new Date(new Date(dataCompra).setMonth(dataCompra.getMonth() + (i - 1)));
 
             let dataDaFatura = new Date(dataVencimento);
-            if (dataVencimento.getDate() > 7) {
+            
+            // --- CORREÇÃO APLICADA AQUI ---
+            // Usamos getUTCDate() para ignorar o fuso horário do navegador
+            if (dataVencimento.getUTCDate() > 7) {
                 dataDaFatura.setMonth(dataDaFatura.getMonth() + 1);
             }
 
@@ -78,8 +81,6 @@ function gerarParcelas(compras) {
                 dataVencimento: dataVencimento,
                 fatura: dataDaFatura,
                 paga: i <= parcelasPagas,
-                // --- NOVA LÓGICA DE IMAGENS ---
-                // Passamos o array de comprovantes da compra original para cada parcela gerada
                 comprovantes: compra.Comprovantes || [] 
             });
         }
