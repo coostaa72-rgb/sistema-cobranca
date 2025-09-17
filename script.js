@@ -71,7 +71,7 @@ function gerarParcelas(compras) {
             
             // --- CORREÇÃO APLICADA AQUI ---
             // Usamos getUTCDate() para ignorar o fuso horário do navegador
-            if (dataVencimento.getUTCDate() > 7) {
+            if (dataVencimento.getUTCDate() > 6) {
                 dataDaFatura.setMonth(dataDaFatura.getMonth() + 1);
             }
 
