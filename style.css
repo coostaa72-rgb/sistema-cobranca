@@ -117,7 +117,7 @@ details[open] > summary::before {
     position: relative; /* Essencial para a Chart.js se dimensionar corretamente */
     min-height: 50px; /* Altura mínima para o gráfico */
     max-height: 200px; /* Altura máxima para o gráfico */
-    padding: 15px;
+    padding: 20px;
     margin-top: 20px;
 }
 
