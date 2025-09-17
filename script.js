@@ -226,8 +226,8 @@ function renderGraficoGastos(dadosFaturas) {
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: true,
+            responsive: false,
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true,
