@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Controle de Cobranças</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="auth-check">
+        <!-- Esta div será usada para mostrar o conteúdo ou uma mensagem de erro -->
+        <div id="dashboard-content" style="display: none;">
+            <div class="container">
+                <h1>Dashboard do Administrador</h1>
+                <div class="dashboard-grid">
+                    <div class="card">
+                        <h3>Total a Receber</h3>
+                        <p id="total-geral" class="metric">R$ 0,00</p>
+                    </div>
+                    <div class="card">
+                        <h3>Devedores Ativos</h3>
+                        <p id="total-devedores" class="metric">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container">
+                <h2>Resumo por Pessoa</h2>
+                <div id="resumo-por-pessoa">
+                    <!-- O resumo será gerado aqui via JS -->
+                    Carregando...
+                </div>
+            </div>
+
+            <div class="container grafico-container">
+                <h2>Valores Pendentes por Fatura</h2>
+                <canvas id="grafico-admin"></canvas>
+            </div>
+        </div>
+
+        <div id="acesso-negado" class="container" style="display: none;">
+            <h1>Acesso Negado</h1>
+            <p>Você não tem permissão para visualizar esta página.</p>
+        </div>
+    </div>
+    
+    <script src="admin.js"></script>
+</body>
+</html>
