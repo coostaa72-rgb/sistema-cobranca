@@ -115,11 +115,25 @@ function renderMeses(parcelas) {
         return acc;
     }, {});
 
-    const faturasOrdenadas = Object.keys(faturasAgrupadas).sort((a, b) => {
-        const dataA = new Date(`01 ${a.replace(' de ', ' ')}`);
-        const dataB = new Date(`01 ${b.replace(' de ', ' ')}`);
-        return dataB - dataA;
-    });
+// Ordena as chaves de fatura (ex: "setembro de 2025") de forma cronológica
+const faturasOrdenadas = Object.keys(faturasAgrupadas).sort((a, b) => {
+    // Converte os nomes dos meses para um formato que o JavaScript entende
+    const meses = {
+        'janeiro': 0, 'fevereiro': 1, 'março': 2, 'abril': 3, 'maio': 4, 'junho': 5,
+        'julho': 6, 'agosto': 7, 'setembro': 8, 'outubro': 9, 'novembro': 10, 'dezembro': 11
+    };
+    
+    // Processa a fatura 'a'
+    const [mesA, anoA] = a.toLowerCase().split(' de ');
+    const dataA = new Date(anoA, meses[mesA]);
+    
+    // Processa a fatura 'b'
+    const [mesB, anoB] = b.toLowerCase().split(' de ');
+    const dataB = new Date(anoB, meses[mesB]);
+    
+    // Compara as datas (mais recente primeiro)
+    return dataB - dataA;
+});
 
     const mesFaturaAtual = new Date();
     if(new Date().getDate() <= 7) mesFaturaAtual.setMonth(mesFaturaAtual.getMonth() - 1);
@@ -193,14 +207,25 @@ function renderMeses(parcelas) {
     
     // --- ADIÇÃO AQUI ---
     // Prepara os dados e chama a função do gráfico
-    const dadosParaGrafico = faturasOrdenadas.map(faturaKey => {
-        const parcelasDaFatura = faturasAgrupadas[faturaKey].parcelas;
-        const totalFatura = parcelasDaFatura.reduce((acc, p) => acc + p.valor, 0); // Soma o valor de TODAS as parcelas da fatura
-        return {
-            nome: faturaKey.charAt(0).toUpperCase() + faturaKey.slice(1),
-            total: totalFatura
-        };
-    }).reverse(); // .reverse() para mostrar do mais antigo para o mais novo no gráfico
+// Prepara os dados e já os ordena para o gráfico (mais antigo primeiro)
+const dadosParaGrafico = Object.keys(faturasAgrupadas).map(faturaKey => {
+    const parcelasDaFatura = faturasAgrupadas[faturaKey].parcelas;
+    const totalFatura = parcelasDaFatura.reduce((acc, p) => acc + p.valor, 0);
+    return {
+        nome: faturaKey,
+        total: totalFatura
+    };
+}).sort((a, b) => { // Nova lógica de ordenação aqui!
+    const meses = {
+        'janeiro': 0, 'fevereiro': 1, 'março': 2, 'abril': 3, 'maio': 4, 'junho': 5,
+        'julho': 6, 'agosto': 7, 'setembro': 8, 'outubro': 9, 'novembro': 10, 'dezembro': 11
+    };
+    const [mesA, anoA] = a.nome.toLowerCase().split(' de ');
+    const dataA = new Date(anoA, meses[mesA]);
+    const [mesB, anoB] = b.nome.toLowerCase().split(' de ');
+    const dataB = new Date(anoB, meses[mesB]);
+    return dataA - dataB; // Compara as datas (mais antigo primeiro para o gráfico)
+});
 
     renderGraficoGastos(dadosParaGrafico);
     // --- FIM DA ADIÇÃO ---
